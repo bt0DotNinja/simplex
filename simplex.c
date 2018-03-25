@@ -24,8 +24,15 @@ int main(int argc,char **argv){
 	mpq_t **Tableau, C[n], b[m], z;
 	int base[m];
 
-	Tableau = (mpq_t **) malloc(m*sizeof(mpq_t *));
-	mpq_init(z);
+	// generar tableau
+	Tableau = (mpq_t **) malloc((m+1)*sizeof(mpq_t *));
+	for(i=0;i<=m;i++){
+		Tableau[i]= (mpq_t *)malloc((n+1)*sizeof(mpq_t));
+		for(j=0;j<=n;j++)
+			mpq_init(Tableau[i][j]);
+	}
+
+
 	//Leer Problema
 	for(i=0;i<n;i++){
 		mpq_init(C[i]);
@@ -41,16 +48,17 @@ int main(int argc,char **argv){
 		mpq_canonicalize(b[i]);
 	}
 
-	for(i=0;i<m;i++)
+	for(i=0;i<m;i++){
 		scanf("%d",&base[i]);
-
+		printf("%d ",base[i]);
+	}
+	printf("\n");
 	if(!baseValida(base,m,n)){
 		printf("Base inicial no valida\n");
 		return 2;
 	}
 
 	for(i=0;i<m;i++){
-		Tableau[i]= (mpq_t *)malloc(n*sizeof(mpq_t));
 		for(j=0;j<n;j++){
 			mpq_init(Tableau[i][j]);
 			scanf("%s",&tmp);
@@ -58,19 +66,15 @@ int main(int argc,char **argv){
 			mpq_canonicalize(Tableau[i][j]);
 		}
 	}
-
+	printf("Lectura lista\n");
 	//revisar base
 	
-	for(i=0;i<m;i++)
-		if(pivoteo(Tableau,m,n,i,base[i])==-1){
-			printf("Base linealmente dependiente\n");
-			return 3;
-		}
-			
-	
 	printSal(Tableau,base,z,m,n);
-
-	if(!factible(b,m)){
+	for(i=0;i<m;i++)
+		if(pivoteo(Tableau,m,n,i,base[i])==-1)
+			flag=1;
+		
+	if(!factible(b,m) || flag){
 		printf("Base inicial infactible\n");
 		return 4;
 	}
@@ -118,10 +122,10 @@ int main(int argc,char **argv){
 return 0;
 }
 
-int factible(mpq_t *B,int m){//done
+int factible(mpq_t **B,int m, int n){//done
 	int i; 
-	for(i=0;i<m;i++)
-		if(mpq_sgn(B[i]) == -1) return 0;
+	for(i=1;i<=m;i++)
+		if(mpq_sgn(B[i][n]) == -1) return 0;
 	return 1;
 }
 
@@ -155,23 +159,26 @@ int baseValida(int *b, int m, int n){//done
 int pivoteo(mpq_t **A,int m,int n,int vSale,int vEntra){
 	int i,j;
 	mpq_t factor,tmp;
-	mpq_inits(factor,tmp);
-	if(mpq_cmp(A[vSale][vEntra],factor) != 0)
+	mpq_inits(factor,tmp,NULL);
+	if(mpq_cmp(A[vSale][vEntra],factor) != 0){
 		mpq_inv(factor, A[vSale][vEntra]);
+	}
 	else{ 
 		mpq_clear(factor);
 		return -1;
 	}
 	for(i=0;i<n;i++)
-		mpq_mul(A[vSale][i],A[vSale][i],factor);
+		mpq_mul(A[vSale][i],factor,A[vSale][i]);
 	for(i=0;i<m;i++){
-		if(i == vSale) continue;
-		mpq_neg(factor,A[i][vEntra]);
+		if(vSale == i) continue;
+		printf("Fila: %d\n",i);
+		mpq_set(factor,A[i][vEntra]);
+		gmp_printf("factor para fila i %Qd\n",factor);
 		for(j=0;j<n;j++){
-			mpq_mul(tmp,factor,A[i][j]);
-			mpq_add(A[i][j],A[i][j],tmp);		
+			mpq_mul(tmp,factor,A[vSale][j]);
+			mpq_sub(A[i][j],A[i][j],tmp);		
 		}
 	}
-	mpq_clears(factor,tmp);
+	mpq_clears(factor,tmp,NULL);
 	return 0;
 }
