@@ -7,21 +7,21 @@
  *
  */
 int baseValida(int *,int,int);
-void printSal(mpq_t **,int *,mpq_t,int,int);
-int factible(mpq_t *,int);
+void printSal(mpq_t **,int *,int,int);
+int factible(mpq_t **,int,int);
 int pivoteo(mpq_t **,int,int,int,int);
 
 int main(int argc,char **argv){
 
-	int i,j,m,n,flag=0;
-	char tmp[4098];
+	int i,j,m,n;
+	char tmp[4098],flag=0;
 
 	scanf("%d %d",&m,&n);
 	if(m>=n){
 		printf("M >= N");
 		return 1;
 	}
-	mpq_t **Tableau, C[n], b[m], z;
+	mpq_t **Tableau;
 	int base[m];
 
 	// generar tableau
@@ -32,20 +32,17 @@ int main(int argc,char **argv){
 			mpq_init(Tableau[i][j]);
 	}
 
-
 	//Leer Problema
 	for(i=0;i<n;i++){
-		mpq_init(C[i]);
 		scanf("%s",&tmp);
-		mpq_set_str(C[i],tmp,0);
-		mpq_canonicalize(C[i]);
+		mpq_set_str(Tableau[0][i],tmp,0);
+		mpq_canonicalize(Tableau[0][i]);
 	}
 
-	for(i=0;i<m;i++){
-		mpq_init(b[i]);
+	for(i=1;i<=m;i++){
 		scanf("%s",&tmp);
-		mpq_set_str(b[i],tmp,0);
-		mpq_canonicalize(b[i]);
+		mpq_set_str(Tableau[i][n],tmp,0);
+		mpq_canonicalize(Tableau[i][n]);
 	}
 
 	for(i=0;i<m;i++){
@@ -58,23 +55,25 @@ int main(int argc,char **argv){
 		return 2;
 	}
 
-	for(i=0;i<m;i++){
+	for(i=1;i<=m;i++){
 		for(j=0;j<n;j++){
-			mpq_init(Tableau[i][j]);
 			scanf("%s",&tmp);
 			mpq_set_str(Tableau[i][j],tmp,0);
 			mpq_canonicalize(Tableau[i][j]);
 		}
 	}
-	printf("Lectura lista\n");
 	//revisar base
 	
-	printSal(Tableau,base,z,m,n);
-	for(i=0;i<m;i++)
-		if(pivoteo(Tableau,m,n,i,base[i])==-1)
+	printSal(Tableau,base,m,n);
+	for(i=1;i<=m;i++){
+		if(pivoteo(Tableau,m,n,i,base[i-1]-1)==-1){
 			flag=1;
+			break;
+		}
+	}
+	printSal(Tableau,base,m,n);
 		
-	if(!factible(b,m) || flag){
+	if(!factible(Tableau,m,n) || flag){
 		printf("Base inicial infactible\n");
 		return 4;
 	}
@@ -112,30 +111,36 @@ int main(int argc,char **argv){
 
 
 	//limpiar variables
-	for(i=0;i<n;i++) 
-		mpq_clear(C[i]);
-	for(i=0;i<m;i++) 
-		mpq_clear(b[i]);
-	for(i=0;i<m;i++)
-		for(j=0;j<n;j++)
+	for(i=0;i<=m;i++){
+		for(j=0;j<=n;j++)
 			mpq_clear(Tableau[i][j]);
+		free(Tableau[i]);
+	}
+	free(Tableau);
 return 0;
 }
 
-int factible(mpq_t **B,int m, int n){//done
+int factible(mpq_t **A,int m, int n){//done
 	int i; 
 	for(i=1;i<=m;i++)
-		if(mpq_sgn(B[i][n]) == -1) return 0;
+		if(mpq_sgn(A[i][n]) == -1) return 0;
 	return 1;
 }
 
-void printSal(mpq_t **A,int *base,mpq_t z,int m,int n){// modificar
+void printSal(mpq_t **A,int *base,int m,int n){// modificar
 	int i,j;
-	for(i=0;i<m;i++){
-		for(j=0;j<n;j++)
+	for(i=0;i<m;i++)
+		printf("%d ", base[i]);	
+	for(i=1;i<=m;i++)
+		gmp_printf("%Qd ",A[base[i-1]][n]);
+	gmp_printf("%Qd\n\n",A[0][n]);
+			
+	for(i=0;i<=m;i++){
+		for(j=0;j<=n;j++)
 			gmp_printf("%Qd ",A[i][j]);
 		printf("\n");
 	}
+	printf("\n");
 }
 int baseValida(int *b, int m, int n){//done
 	int i,*bin = (int *) malloc(m*sizeof(int));
@@ -164,17 +169,15 @@ int pivoteo(mpq_t **A,int m,int n,int vSale,int vEntra){
 		mpq_inv(factor, A[vSale][vEntra]);
 	}
 	else{ 
-		mpq_clear(factor);
+		mpq_clears(factor,tmp,NULL);
 		return -1;
 	}
-	for(i=0;i<n;i++)
+	for(i=0;i<=n;i++)
 		mpq_mul(A[vSale][i],factor,A[vSale][i]);
-	for(i=0;i<m;i++){
+	for(i=0;i<=m;i++){
 		if(vSale == i) continue;
-		printf("Fila: %d\n",i);
 		mpq_set(factor,A[i][vEntra]);
-		gmp_printf("factor para fila i %Qd\n",factor);
-		for(j=0;j<n;j++){
+		for(j=0;j<=n;j++){
 			mpq_mul(tmp,factor,A[vSale][j]);
 			mpq_sub(A[i][j],A[i][j],tmp);		
 		}
