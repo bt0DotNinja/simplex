@@ -10,6 +10,9 @@ int baseValida(int *,int,int);
 void printSal(mpq_t **,int *,int,int);
 int factible(mpq_t **,int,int);
 int pivoteo(mpq_t **,int,int,int,int);
+void bland(mpq_t **,int,int,int*,int*);
+int selEntrada(mpq_t **,int,int);
+int selSalida(mpq_t **,int,int,int);
 
 int main(int argc,char **argv){
 
@@ -64,7 +67,6 @@ int main(int argc,char **argv){
 	}
 	//revisar base
 	
-	printSal(Tableau,base,m,n);
 	for(i=1;i<=m;i++){
 		if(pivoteo(Tableau,m,n,i,base[i-1]-1)==-1){
 			flag=1;
@@ -77,7 +79,7 @@ int main(int argc,char **argv){
 		printf("Base inicial infactible\n");
 		return 4;
 	}
-
+	
 
 	
 
@@ -184,4 +186,42 @@ int pivoteo(mpq_t **A,int m,int n,int vSale,int vEntra){
 	}
 	mpq_clears(factor,tmp,NULL);
 	return 0;
+}
+void bland(mpq_t **A,int m,int n,int *vSale,int *vEntra){
+	int i,j;
+	for(i=0;i<n;i++)
+		if(mpq_sgn(A[0][i]) < 0){
+			*vEntra=i;
+			break;
+		}
+	for(j=1;j<=m;j++)
+		if(mpq_sgn(A[j][i]) > 0){
+			*vSale=j;
+			break;
+		}
+}
+int selEntrada(mpq_t **A,int m,int n){
+	int i, ind=0;
+	mpq_t minimo;
+	mpq_init(minimo);
+	mpq_set(minimo,A[0][0])
+	for(i=1;i<n;i++){
+		if(mpq_cmp(minimo,A[0][i])>0){
+			mpq_set(minimo,A[0][i]);
+			ind=i;
+		}
+	}
+	if(mpq_sgn(minimo) > 0)
+		ind=-1; //optimo
+	mpq_clear(minimo);
+	return ind;
+}
+int selSalida(mpq_t **A,int m, int n, int vEntra){
+	int i,ind=-1; //no acotado
+	for(i=1;i<=m;i++)
+		if(mpq_sgn(A[i][vEntra]) > 0){
+			ind=i;
+			break;
+		}
+	return ind;
 }
