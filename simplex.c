@@ -199,7 +199,7 @@ int selEntrada(mpq_t **A,int m,int n){
 			ind=i;
 		}
 	}
-	if(mpq_sgn(minimo) > 0)
+	if(mpq_sgn(minimo) >= 0)
 		ind=-1; //optimo
 	mpq_clear(minimo);
 	return ind;
