@@ -157,11 +157,7 @@ void bland(mpq_t **A,int m,int n,int *vSale,int *vEntra){
 			*vEntra=i;
 			break;
 		}
-	for(j=0;j<n;j++)
-		if(mpq_sgn(A[0][i]) == 0){
-			*vSale=j;
-			break;
-		}
+	 *vSale=selSalida(A,m,n,*vEntra);
 }
 int selEntrada(mpq_t **A,int m,int n){
 	int i, ind=0;
