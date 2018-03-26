@@ -3,8 +3,8 @@
 #include <strings.h>
 #include <gmp.h>
 /*
- * 
- *
+ * Diana Karina Romero <dkrn_mx@hotmail.com>
+ * Alberto Rodriguez Sanchez <bt0dotninja@fedoraproject.org>
  */
 int baseValida(int *,int,int);
 void printSal(mpq_t **,int *,int,int);
@@ -17,7 +17,6 @@ int selSalida(mpq_t **,int,int,int);
 int main(int argc,char **argv){
 	int i,j,m,n,entra,sale;
 	char tmp[4098],flag=0;
-
 	scanf("%d %d",&m,&n);
 	if(m>=n){
 		printf("M >= N");
@@ -38,7 +37,6 @@ int main(int argc,char **argv){
 		mpq_set_str(Tableau[0][i],tmp,0);
 		mpq_canonicalize(Tableau[0][i]);
 	}
-
 	for(i=1;i<=m;i++){
 		scanf("%s",&tmp);
 		mpq_set_str(Tableau[i][n],tmp,0);
@@ -95,7 +93,6 @@ int main(int argc,char **argv){
 	free(Tableau);
 return 0;
 }
-
 int factible(mpq_t **A,int m, int n){//done
 	int i; 
 	for(i=1;i<=m;i++)
@@ -160,8 +157,8 @@ void bland(mpq_t **A,int m,int n,int *vSale,int *vEntra){
 			*vEntra=i;
 			break;
 		}
-	for(j=1;j<=m;j++)
-		if(mpq_sgn(A[j][i]) > 0){
+	for(j=0;j<n;j++)
+		if(mpq_sgn(A[0][i]) == 0){
 			*vSale=j;
 			break;
 		}
@@ -170,7 +167,7 @@ int selEntrada(mpq_t **A,int m,int n){
 	int i, ind=0;
 	mpq_t minimo;
 	mpq_init(minimo);
-	mpq_set(minimo,A[0][0]);
+	mpq_set(minimo,A[0][0]); 
 	for(i=1;i<n;i++){
 		if(mpq_cmp(minimo,A[0][i])>0){
 			mpq_set(minimo,A[0][i]);
@@ -183,11 +180,19 @@ int selEntrada(mpq_t **A,int m,int n){
 	return ind;
 }
 int selSalida(mpq_t **A,int m, int n, int vEntra){
-	int i,ind=-1; //no acotado
+	int i,ind=-1;
+	mpq_t minimo,div;
+	mpq_inits(minimo,div,NULL);
 	for(i=1;i<=m;i++)
 		if(mpq_sgn(A[i][vEntra]) > 0){
-			ind=i;
-			break;
+			mpq_div(div,A[i][n],A[i][vEntra]);
+			if(mpq_cmp(minimo,div) > 0 || mpq_sgn(minimo) == 0){
+				mpq_set(minimo,div);
+				ind=i;
+			}
 		}
+	if(mpq_sgn(minimo)<0)
+		ind=-1; //no acotado
+	mpq_clears(minimo,div,NULL);
 	return ind;
 }
