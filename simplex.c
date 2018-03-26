@@ -15,7 +15,6 @@ int selEntrada(mpq_t **,int,int);
 int selSalida(mpq_t **,int,int,int);
 
 int main(int argc,char **argv){
-
 	int i,j,m,n,entra,sale;
 	char tmp[4098],flag=0;
 
@@ -26,7 +25,6 @@ int main(int argc,char **argv){
 	}
 	mpq_t **Tableau;
 	int base[m];
-
 	// generar tableau
 	Tableau = (mpq_t **) malloc((m+1)*sizeof(mpq_t *));
 	for(i=0;i<=m;i++){
@@ -34,7 +32,6 @@ int main(int argc,char **argv){
 		for(j=0;j<=n;j++)
 			mpq_init(Tableau[i][j]);
 	}
-
 	//Leer Problema
 	for(i=0;i<n;i++){
 		scanf("%s",&tmp);
@@ -47,17 +44,13 @@ int main(int argc,char **argv){
 		mpq_set_str(Tableau[i][n],tmp,0);
 		mpq_canonicalize(Tableau[i][n]);
 	}
-
-	for(i=0;i<m;i++){
+	for(i=0;i<m;i++)
 		scanf("%d",&base[i]);
-		printf("%d ",base[i]);
-	}
-	printf("\n");
+
 	if(!baseValida(base,m,n)){
 		printf("Base inicial no valida\n");
 		return 2;
 	}
-
 	for(i=1;i<=m;i++){
 		for(j=0;j<n;j++){
 			scanf("%s",&tmp);
@@ -65,8 +58,6 @@ int main(int argc,char **argv){
 			mpq_canonicalize(Tableau[i][j]);
 		}
 	}
-	//revisar base
-	
 	for(i=1;i<=m;i++){
 		if(pivoteo(Tableau,m,n,i,base[i-1]-1)==-1){
 			flag=1;
@@ -74,31 +65,26 @@ int main(int argc,char **argv){
 		}
 	}
 	printSal(Tableau,base,m,n);
-		
 	if(!factible(Tableau,m,n) || flag){
 		printf("Base inicial infactible\n");
 		return 4;
 	}
-	
 	while(1){
 		entra=selEntrada(Tableau, m,n);
 		if(entra==-1){
-			printSal(Tableau,base,m,n);
 			printf("Base final optima\n");
 			break;
 		}
 		sale=selSalida(Tableau,m,n,entra);
 		if(sale==-1){
-			printSal(Tableau,base,m,n);
 			printf("No acotamiento\n");
 			break;
 		}
 		if(mpq_sgn(Tableau[sale][n]) == 0)
 			bland(Tableau,m,n,&sale,&entra);
-		base[sale - 1]=entra;
+		base[sale - 1]=entra+1;
 		pivoteo(Tableau,m,n,sale,entra);
 		printSal(Tableau,base,m,n);
-		
 	}
 	//limpiar variables
 	for(i=0;i<=m;i++){
@@ -116,21 +102,13 @@ int factible(mpq_t **A,int m, int n){//done
 		if(mpq_sgn(A[i][n]) == -1) return 0;
 	return 1;
 }
-
 void printSal(mpq_t **A,int *base,int m,int n){// modificar
 	int i,j;
 	for(i=0;i<m;i++)
 		printf("%d ", base[i]);	
 	for(i=1;i<=m;i++)
-		gmp_printf("%Qd ",A[base[i-1]][n]);
-	gmp_printf("%Qd\n\n",A[0][n]);
-			
-	for(i=0;i<=m;i++){
-		for(j=0;j<=n;j++)
-			gmp_printf("%Qd ",A[i][j]);
-		printf("\n");
-	}
-	printf("\n");
+		gmp_printf("%Qd ",A[i][n]);
+	gmp_printf("%Qd\n",A[0][n]);
 }
 int baseValida(int *b, int m, int n){//done
 	int i,*bin = (int *) malloc(m*sizeof(int));
