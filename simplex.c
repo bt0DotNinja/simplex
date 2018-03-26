@@ -16,7 +16,7 @@ int selSalida(mpq_t **,int,int,int);
 
 int main(int argc,char **argv){
 
-	int i,j,m,n;
+	int i,j,m,n,entra,sale;
 	char tmp[4098],flag=0;
 
 	scanf("%d %d",&m,&n);
@@ -80,38 +80,26 @@ int main(int argc,char **argv){
 		return 4;
 	}
 	
-
-	
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	while(1){
+		entra=selEntrada(Tableau, m,n);
+		if(entra==-1){
+			printSal(Tableau,base,m,n);
+			printf("Base final optima\n");
+			break;
+		}
+		sale=selSalida(Tableau,m,n,entra);
+		if(sale==-1){
+			printSal(Tableau,base,m,n);
+			printf("No acotamiento\n");
+			break;
+		}
+		if(mpq_sgn(Tableau[sale][n]) == 0)
+			bland(Tableau,m,n,&sale,&entra);
+		base[sale - 1]=entra;
+		pivoteo(Tableau,m,n,sale,entra);
+		printSal(Tableau,base,m,n);
+		
+	}
 	//limpiar variables
 	for(i=0;i<=m;i++){
 		for(j=0;j<=n;j++)
@@ -204,7 +192,7 @@ int selEntrada(mpq_t **A,int m,int n){
 	int i, ind=0;
 	mpq_t minimo;
 	mpq_init(minimo);
-	mpq_set(minimo,A[0][0])
+	mpq_set(minimo,A[0][0]);
 	for(i=1;i<n;i++){
 		if(mpq_cmp(minimo,A[0][i])>0){
 			mpq_set(minimo,A[0][i]);
