@@ -87,20 +87,11 @@ int selSalida(mpq_t **A,int m, int n, int vEntra, int *base,int bland){
 		if(mpq_sgn(A[i][vEntra]) > 0){
 			mpq_div(div,A[i][n],A[i][vEntra]);
 			sel = mpq_cmp(minimo,div);
-			if( sel >= 0 || bi == 0){
-				if(sel > 0 || bi ==0){
+			if( (sel > 0 || bi == 0) ||(bland && sel == 0)){
 					mpq_set(minimo,div);
 					ind=i;
 					bi=base[i];
 				}
-				else if(sel == 0 && bland){ //Bland
-					if(bi > base[i]){
-						mpq_set(minimo,div);
-						ind=i;
-						bi=base[i];
-					}
-				}
-			}
 		}
 	mpq_clears(minimo,div,NULL);
 	return ind;
