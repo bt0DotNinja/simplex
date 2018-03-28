@@ -5,8 +5,8 @@
 #include <stdlib.h> //malloc y free
 #include <strings.h> //bzero
 #include <gmp.h> //mpq_* gmp*
-#define BLAND 1
-
+#define BLAND 0
+#define MAX 2098 // 1024 '/' 1024 '\n' <--> 
 
 int factible(mpq_t **A,int m, int n){//done
 	int i; 
@@ -92,7 +92,7 @@ int selSalida(mpq_t **A,int m, int n, int vEntra, int *base,int bland){
 		if(mpq_sgn(A[i][vEntra]) > 0){
 			mpq_div(div,A[i][n],A[i][vEntra]);
 			sel = mpq_cmp(minimo,div);
-			if( (sel > 0 || bi == 0) ||(bland && sel == 0)){
+			if( (sel > 0 || bi == 0) ||(bland && sel == 0 && bi > base[i-1]-1)){
 					mpq_set(minimo,div);
 					ind=i;
 					bi=base[i];
@@ -113,7 +113,7 @@ void clc(mpq_t **Tableau,int m,int n){
 
 int main(int argc,char **argv){
 	int i,j,m,n,entra,sale;
-	char tmp[4098],flag=0;
+	char tmp[MAX],flag=0;
 	scanf("%d %d",&m,&n);
 
 	if(m>n){
