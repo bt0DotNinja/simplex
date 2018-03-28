@@ -1,7 +1,12 @@
+// Diana Karina Romero
+// Alberto Rodriguez Sanchez
+
 #include <stdio.h>
 #include <stdlib.h> //malloc y free
 #include <strings.h> //bzero
 #include <gmp.h> //mpq_* gmp*
+#define BLAND 1
+
 
 int factible(mpq_t **A,int m, int n){//done
 	int i; 
@@ -104,17 +109,18 @@ void clc(mpq_t **Tableau,int m,int n){
 		free(Tableau[i]);
 	}
 	free(Tableau);
-
 }
 
 int main(int argc,char **argv){
 	int i,j,m,n,entra,sale;
 	char tmp[4098],flag=0;
 	scanf("%d %d",&m,&n);
+
 	if(m>n){
 		printf("M >= N");
 		return 1;
 	}
+
 	mpq_t **Tableau;
 	int base[m];
 	Tableau = (mpq_t **) malloc((m+1)*sizeof(mpq_t *));
@@ -123,16 +129,19 @@ int main(int argc,char **argv){
 		for(j=0;j<=n;j++)
 			mpq_init(Tableau[i][j]);
 	}
+
 	for(i=0;i<n;i++){
 		scanf("%s",&tmp);
 		mpq_set_str(Tableau[0][i],tmp,0);
 		mpq_canonicalize(Tableau[0][i]);
 	}
+
 	for(i=1;i<=m;i++){
 		scanf("%s",&tmp);
 		mpq_set_str(Tableau[i][n],tmp,0);
 		mpq_canonicalize(Tableau[i][n]);
 	}
+
 	for(i=0;i<m;i++)
 		scanf("%d",&base[i]);
 
@@ -141,6 +150,7 @@ int main(int argc,char **argv){
 		clc(Tableau,m,n);
 		return 2;
 	}
+
 	for(i=1;i<=m;i++){
 		for(j=0;j<n;j++){
 			scanf("%s",&tmp);
@@ -148,18 +158,21 @@ int main(int argc,char **argv){
 			mpq_canonicalize(Tableau[i][j]);
 		}
 	}
+
 	for(i=1;i<=m;i++){
 		if(pivoteo(Tableau,m,n,i,base[i-1]-1)==-1){
 			flag=1;
 			break;
 		}
 	}
+
 	printSal(Tableau,base,m,n);
 	if(!factible(Tableau,m,n) || flag){
 		printf("Base inicial no factible\n");
 		clc(Tableau,m,n);
 		return 4;
 	}
+
 	while(1){
 		entra=selEntrada(Tableau, m,n,0);
 		if(entra==-1){
@@ -172,8 +185,8 @@ int main(int argc,char **argv){
 			break;
 		}
 		if(mpq_sgn(Tableau[sale][n]) == 0){
-			entra=selEntrada(Tableau, m,n,1);
-			sale=selSalida(Tableau,m,n,entra,base,1);
+			entra=selEntrada(Tableau, m,n,BLAND);
+			sale=selSalida(Tableau,m,n,entra,base,BLAND);
 		}
 		base[sale - 1]=entra+1;
 		pivoteo(Tableau,m,n,sale,entra);
