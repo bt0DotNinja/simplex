@@ -61,7 +61,7 @@ int pivoteo(mpq_t **A,int m,int n,int vSale,int vEntra){
 	mpq_clears(factor,tmp,NULL);
 	return 0;
 }
-int selEntrada(mpq_t **A,int m,int n){
+int selEntrada(mpq_t **A,int m,int n,int bland){
 	int i, ind=0;
 	mpq_t minimo;
 	mpq_init(minimo);
@@ -70,6 +70,8 @@ int selEntrada(mpq_t **A,int m,int n){
 		if(mpq_cmp(minimo,A[0][i])>0){
 			mpq_set(minimo,A[0][i]);
 			ind=i;
+			if(bland) 
+				break;
 		}
 	}
 	if(mpq_sgn(minimo) >= 0)
@@ -77,29 +79,31 @@ int selEntrada(mpq_t **A,int m,int n){
 	mpq_clear(minimo);
 	return ind;
 }
-int selSalida(mpq_t **A,int m, int n, int vEntra){
-	int i,ind=-1;
+int selSalida(mpq_t **A,int m, int n, int vEntra, int *base,int bland){
+	int i,ind=-1, bi=0,sel=0;
 	mpq_t minimo,div;
 	mpq_inits(minimo,div,NULL);
 	for(i=1;i<=m;i++)
 		if(mpq_sgn(A[i][vEntra]) > 0){
 			mpq_div(div,A[i][n],A[i][vEntra]);
-			if(mpq_cmp(minimo,div) > 0 || mpq_sgn(minimo) == 0){
-				mpq_set(minimo,div);
-				ind=i;
+			sel = mpq_cmp(minimo,div);
+			if( sel >= 0 || bi == 0){
+				if(sel > 0 || bi ==0){
+					mpq_set(minimo,div);
+					ind=i;
+					bi=base[i];
+				}
+				else if(sel == 0 && bland){ //Bland
+					if(bi > base[i]){
+						mpq_set(minimo,div);
+						ind=i;
+						bi=base[i];
+					}
+				}
 			}
 		}
 	mpq_clears(minimo,div,NULL);
 	return ind;
-}
-void bland(mpq_t **A,int m,int n,int *vSale,int *vEntra){
-	int i,j;
-	for(i=0;i<n;i++)
-		if(mpq_sgn(A[0][i]) < 0){
-			*vEntra=i;
-			break;
-		}
-	 *vSale=selSalida(A,m,n,*vEntra);
 }
 void clc(mpq_t **Tableau,int m,int n){
 	int i,j;
@@ -166,18 +170,20 @@ int main(int argc,char **argv){
 		return 4;
 	}
 	while(1){
-		entra=selEntrada(Tableau, m,n);
+		entra=selEntrada(Tableau, m,n,0);
 		if(entra==-1){
 			printf("Base final optima\n");
 			break;
 		}
-		sale=selSalida(Tableau,m,n,entra);
+		sale=selSalida(Tableau,m,n,entra,base,0);
 		if(sale==-1){
 			printf("No acotamiento\n");
 			break;
 		}
-		if(mpq_sgn(Tableau[sale][n]) == 0)
-			bland(Tableau,m,n,&sale,&entra);
+		if(mpq_sgn(Tableau[sale][n]) == 0){
+			entra=selEntrada(Tableau, m,n,1);
+			sale=selSalida(Tableau,m,n,entra,base,1);
+		}
 		base[sale - 1]=entra+1;
 		pivoteo(Tableau,m,n,sale,entra);
 		printSal(Tableau,base,m,n);
